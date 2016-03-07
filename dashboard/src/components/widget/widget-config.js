@@ -10,6 +10,9 @@
  */
 'use strict';
 
+import {CheAccordion} from './accordion/che-accordion.directive';
+import {CheAccordionTitle} from './accordion/che-accordion-title.directive';
+import {CheAccordionBody} from './accordion/che-accordion-body.directive';
 import {CheButtonPrimary} from './button/che-button-primary.directive';
 import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
@@ -60,8 +63,13 @@ export class WidgetConfig {
 
   constructor(register) {
 
-    //box
-    register.directive('cheButtonPrimary', CheButtonPrimary)
+    // accordion
+    register.directive('cheAccordion', CheAccordion)
+      .directive('cheAccordionTitle', CheAccordionTitle)
+      .directive('cheAccordionBody', CheAccordionBody)
+
+      // button
+      .directive('cheButtonPrimary', CheButtonPrimary)
       .directive('cheButtonDanger', CheButtonDanger)
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)
