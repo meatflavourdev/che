@@ -12,11 +12,11 @@
 
 /**
  * @ngdoc directive
- * @name dashboard.directive:WelcomeBack
- * @description This class is handling the directive of the 'welcome back' panel in the dashboard
- * @author Florent Benoit
+ * @name dashboard.directive:DashboardLastWorkspaces
+ * @description This class is handling the directive of the listing last opened workspaces in the dashboard
+ * @author Oleksii Orel
  */
-export class WelcomeBack {
+export class DashboardLastWorkspaces {
 
 
   /**
@@ -25,10 +25,10 @@ export class WelcomeBack {
    */
   constructor() {
     this.restrict = 'E';
-    this.templateUrl = 'app/dashboard/welcome-back/welcome-back.html';
+    this.templateUrl = 'app/dashboard/last-workspaces/last-workspaces.html';
 
-    this.controller = 'WelcomeBackCtrl';
-    this.controllerAs = 'welcomeBackCtrl';
+    this.controller = 'DashboardLastWorkspacesController';
+    this.controllerAs = 'dashboardLastWorkspacesController';
     this.bindToController = true;
   }
 
