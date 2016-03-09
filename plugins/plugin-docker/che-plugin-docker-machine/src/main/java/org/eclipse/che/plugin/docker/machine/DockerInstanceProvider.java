@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.plugin.docker.machine.DockerInstanceKey.DIGEST;
 
 /**
  * Docker implementation of {@link InstanceProvider}
@@ -344,7 +345,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
     }
 
-    // TODO rework in accordance with v2 docker registry API
+    /*// TODO rework in accordance with v2 docker registry API
     @Override
     public void removeInstanceSnapshot(InstanceKey instanceKey) throws SnapshotException {
         // use registry API directly because docker doesn't have such API yet
@@ -360,6 +361,47 @@ public class DockerInstanceProvider implements InstanceProvider {
         sb.append(registry).append("/v1/repositories/");
         sb.append(repository);
         sb.append("/");// do not remove! Doesn't work without this slash
+        try {
+            final HttpURLConnection conn = (HttpURLConnection)new URL(sb.toString()).openConnection();
+            try {
+                conn.setConnectTimeout(30 * 1000);
+                conn.setRequestMethod("DELETE");
+                // fixme add auth header for secured registry
+//                conn.setRequestProperty("Authorization", authHeader);
+                final int responseCode = conn.getResponseCode();
+                if ((responseCode / 100) != 2) {
+                    InputStream in = conn.getErrorStream();
+                    if (in == null) {
+                        in = conn.getInputStream();
+                    }
+                    LOG.error(IoUtil.readAndCloseQuietly(in));
+                    throw new SnapshotException("Internal server error occurs. Can't remove snapshot");
+                }
+            } finally {
+                conn.disconnect();
+            }
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+    }*/
+
+    @Override
+    public void removeInstanceSnapshot(InstanceKey instanceKey) throws SnapshotException {
+        // use registry API directly because docker doesn't have such API yet
+        // https://github.com/docker/docker-registry/issues/45
+        final DockerInstanceKey dockerInstanceKey = new DockerInstanceKey(instanceKey);
+        String registry = dockerInstanceKey.getRegistry();
+        String repository = dockerInstanceKey.getRepository();
+        if (registry == null || repository == null) {
+            throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
+        }
+
+        StringBuilder sb = new StringBuilder("http://"); // TODO make possible to use https here
+        sb.append(registry)
+          .append("/v2/")
+          .append(repository)
+          .append("manifests/")
+          .append(instanceKey.getFields().get(DIGEST));
         try {
             final HttpURLConnection conn = (HttpURLConnection)new URL(sb.toString()).openConnection();
             try {

@@ -196,13 +196,13 @@ public class DockerInstance extends AbstractInstance {
             Thread.sleep(2000);
 
             final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
-            docker.push(repository, null, registry, currentProgressStatus -> {
+            String digest = docker.push(repository, null, registry, currentProgressStatus -> {
                 try {
                     outputConsumer.writeLine(progressLineFormatter.format(currentProgressStatus));
                 } catch (IOException ignored) {
                 }
             });
-            return new DockerInstanceKey(repository, registry);
+            return new DockerInstanceKey(repository, registry, digest);
         } catch (IOException e) {
             throw new MachineException(e);
         } catch (InterruptedException e) {
