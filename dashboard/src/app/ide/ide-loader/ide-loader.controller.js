@@ -44,6 +44,9 @@ class IdeLoaderCtrl {
     this.$location.path('#/');
   }
 
+  downloadLogs() {
+    window.open('data:text/csv,' + encodeURIComponent(this.getCreationSteps()[this.getCurrentProgressStep()].logs));
+  }
 }
 
 
