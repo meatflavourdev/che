@@ -45,7 +45,7 @@ public class SnapshotImpl implements Snapshot {
     public SnapshotImpl(Snapshot snapshot) {
         this(snapshot.getId(),
              snapshot.getType(),
-             null,
+             null, // snapshot.getInstanceKey(),
              snapshot.getOwner(),
              snapshot.getCreationDate(),
              snapshot.getWorkspaceId(),

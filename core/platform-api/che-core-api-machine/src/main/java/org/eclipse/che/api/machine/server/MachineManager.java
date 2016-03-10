@@ -807,7 +807,9 @@ public class MachineManager {
             snapshotDao.saveSnapshot(snapshotWithKey);
             try {
                 snapshotDao.removeSnapshot(snapshotDao.getSnapshot(snapshot.getWorkspaceId(), snapshot.getEnvName(), snapshot.getMachineName()).getId());
-                machineInstanceProviders.getProvider(snapshot.getType()).removeInstanceSnapshot(snapshot.getInstanceKey());
+                if (snapshot.getInstanceKey() != null) {
+                    machineInstanceProviders.getProvider(snapshot.getType()).removeInstanceSnapshot(snapshot.getInstanceKey());
+                }
             } catch (NotFoundException ignored) {
                //DO nothing if we has no snapshots
             }
