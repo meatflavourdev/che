@@ -25,57 +25,82 @@ export class CheLoaderCrane {
     this.replace = true;
     this.templateUrl = 'components/widget/loader/che-crane.html';
 
-    // we require ngModel as we want to use it inside our directive
-    //this.require = ['ngModel'];
-
     // scope values
     this.scope = {
       step: '@cheStep',
-      stepsToShow: '@cheSteps',
-      switchOnIteration: '@cheSwitchOnIteration'
+      allSteps: '=cheAllSteps',
+      excludeSteps: '=cheExcludeSteps',
+      switchOnIteration: '=?cheSwitchOnIteration'
     };
-  }
-
-  compile(element, attr) {
-
   }
 
   link ($scope, element) {
     let cargoEl = element.find('#load'),
       oldSteps = [],
       newStep,
+      animationStopping = false,
       animationRunning = false;
-    console.log('steps to show: ', $scope.stepsToShow);
 
-    $scope.$watch(() => {return $scope.step;}, (newVal,oldVal) => {
-      if (oldSteps.indexOf(oldVal) === -1) {
-        oldSteps.push(oldVal);
+    $scope.$watch(() => {return $scope.step;}, (newVal) => {
+      newVal = parseInt(newVal,10);
+
+      // try to stop animation on last step
+      if (newVal === $scope.allSteps.length - 1) {
+        animationStopping = true;
+
+        if (!$scope.switchOnIteration) {
+          // stop animation immediately if it shouldn't wait untill next iteration
+          setNoAnimation();
+        }
       }
+
+      // skip steps excluded
+      if ($scope.excludeSteps.indexOf(newVal) !== -1) {
+        return;
+      }
+
       newStep = newVal;
 
-      // animation initialization
-      if (animationRunning === false || $scope.switchOnIteration === true){
-        animationRunning = true;
+      // go to next step
+      // if animation hasn't run yet or it shouldn't wait untill next iteration
+      if (!animationRunning || !$scope.switchOnIteration){
+        setAnimation();
         setCurrentStep();
+      }
+
+      if (oldSteps.indexOf(newVal) === -1) {
+        oldSteps.push(newVal);
       }
     });
 
-    if ($scope.switchOnIteration === true) {
-      // event fires on animation iteration end
+    if (!!$scope.switchOnIteration) {
+      element.find('.anim.trolley-block').bind('animationstart', () => {
+        animationRunning = true;
+      });
       element.find('.anim.trolley-block').bind('animationiteration', () => {
         setCurrentStep();
+        if (animationStopping) {
+          setNoAnimation();
+        }
       });
     }
 
-    let setCurrentStep = () => {
-        for (let i=0; i<oldSteps.length; i++) {
-          element.removeClass('step-'+oldSteps[i]);
-          cargoEl.removeClass('layer-'+oldSteps[i]);
-        }
-        oldSteps.length = 0;
+    let setAnimation = () => {
+      element.removeClass('no-anim');
+    },
+    setNoAnimation = () => {
+      animationRunning = false;
+      element.addClass('no-anim');
+    },
+    setCurrentStep = () => {
+      for (let i=0; i<oldSteps.length; i++) {
+        element.removeClass('step-'+oldSteps[i]);
+        cargoEl.removeClass('layer-'+oldSteps[i]);
+      }
+      oldSteps.length = 0;
 
-        element.addClass('step-'+newStep);
-        cargoEl.addClass('layer-'+newStep);
+      element.addClass('step-'+newStep);
+      cargoEl.addClass('layer-'+newStep);
     }
   }
 

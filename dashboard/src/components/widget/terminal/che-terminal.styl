@@ -28,24 +28,15 @@ $terminal-background-color = #373737
   position relative
   height $terminal-init-height
   width $terminal-init-width
-  //opacity 0
-  //transition all 1s
 
 
   .top-border
-    //position absolute
-    //top -($terminal-border-thickness)
-    //left 0
     background-color $terminal-side-color
     height $terminal-border-thickness
-    //width $terminal-width
     transform-origin bottom left
     transform skewX(-($terminal-border-angle))
 
   .right-border
-    //position absolute
-    //top 0
-    //right -($terminal-border-thickness)
     background-color $terminal-side-color
     height $terminal-height
     width $terminal-border-thickness

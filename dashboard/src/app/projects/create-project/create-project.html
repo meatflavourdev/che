@@ -55,18 +55,17 @@
         <!--crane and terminals-->
         <div layout="row">
           <div flex="initial">
-            <!--todo-->
-            <che-loader-crane che-step=""
-                              che-steps=""
-                              che-switch-on-iteration="false">
+            <che-loader-crane che-all-steps="createProjectCtrl.getCreationSteps()"
+                              che-exclude-steps="[createProjectCtrl.getCreationSteps().length-1]"
+                              che-step="{{createProjectCtrl.getCurrentProgressStep()}}"
+                              che-switch-on-iteration="true">
             </che-loader-crane>
           </div>
           <div flex flex-offset="5">
             <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()" che-index="{{$index}}"
                            che-current-step="{{createProjectCtrl.getCurrentProgressStep()}}">
-              <che-accordion-title>{{createProjectCtrl.getCreationSteps()[$index].text}}{{$index < createProjectCtrl.getCurrentProgressStep() ? ' ... completed' : ''}}
-              </che-accordion-title>
-              <che-accordion-body ng-show="$index>0">
+              <che-accordion-title>{{createProjectCtrl.getCreationSteps()[$index].text}}{{$index < createProjectCtrl.getCurrentProgressStep() ? ' ... completed' : ''}}</che-accordion-title>
+              <che-accordion-body ng-show="$index>0 && $index<createProjectCtrl.getCreationSteps().length-1">
                 <che-terminal che-title="{{createProjectCtrl.getCreationSteps()[$index].inProgressText}}"
                               che-text="{{createProjectCtrl.getCreationSteps()[$index].logs}}"></che-terminal>
               </che-accordion-body>
@@ -77,10 +76,6 @@
         <che-loader-bottom-bar>
           <div layout="row">
             <div flex="50">
-              <!--todo-->
-              <!--<div layout="column" layout-align="end start">-->
-              <!--<span ng-click="backToDashboard()" class="return-link">&larr; Back to Dashboard</span>-->
-              <!--</div>-->
             </div>
             <div flex="50" layout="column" layout-align="start end">
               <div layout="row"
@@ -99,11 +94,11 @@
                 </div>
               </div>
               <div layout="column" layout-align="end end"
-                   ng-show="createProjectCtrl.getCreationSteps()[$index].hasError">
+                   ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
                 <che-button-danger che-button-title="Retry"
                                    ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
-              <span class="error-logs-link"
-                    ng-click="downloadLogs(createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].logs)">Problem? download logs</span>
+                <span class="create-project-error-logs-link"
+                  ng-click="createProjectCtrl.downloadLogs()">Problem? download logs</span>
               </div>
             </div>
           </div>

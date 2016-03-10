@@ -1,4 +1,4 @@
-<div class="crane" class="step-{{step}}">
+<div class="crane no-anim">
   <!--box-->
   <div class="box">
     <div class="box-bottom-side"></div>
@@ -13,8 +13,7 @@
   </div>
   <!--layers in box-->
   <div class="layers-in-box">
-    <!--todo: ctrl.stepsToShow-->
-    <div ng-repeat="idx in stepsToShow track by $index" class="layer-{{$index}}">
+    <div ng-repeat="idx in allSteps track by $index" class="layer-{{$index}}">
       <div class="layer anim">
         <div class="layer-front-sides">
           <div class="layer-left-side"></div>
