@@ -165,11 +165,9 @@ public class RefactoringUpdater {
     /** Iterates over opened editors and fetch file with specified path or returns null. */
     private FileReferenceNode getOpenedFileOrNull(String path) {
         VirtualFile vFile = null;
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
-            if (editor.getEditorInput().getFile().getPath().equals(path)) {
-                vFile = editor.getEditorInput().getFile();
-                break;
-            }
+        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(path);
+        if (openedEditor != null) {
+            vFile = openedEditor.getEditorInput().getFile();
         }
 
         if (vFile == null || !(vFile instanceof FileReferenceNode)) {

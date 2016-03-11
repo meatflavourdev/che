@@ -362,14 +362,7 @@ public class BreakpointManagerImpl implements BreakpointManager, LineChangeActio
 
     @Nullable
     private EditorPartPresenter getEditorForFile(String path) {
-        final Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (final String key : openedEditors.keySet()) {
-            final EditorPartPresenter editor = openedEditors.get(key);
-            if (path.equals(editor.getEditorInput().getFile().getPath())) {
-                return editor;
-            }
-        }
-        return null;
+        return editorAgent.getOpenedEditor(path);
     }
 
     @Nullable

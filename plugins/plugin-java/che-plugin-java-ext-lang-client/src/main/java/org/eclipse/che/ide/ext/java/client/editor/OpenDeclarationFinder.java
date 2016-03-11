@@ -38,8 +38,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.Map;
-
 /**
  * @author Evgen Vidolob
  */
@@ -101,16 +99,11 @@ public class OpenDeclarationFinder {
     }
 
     private void handleDescriptor(final OpenDeclarationDescriptor descriptor) {
-        Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (String s : openedEditors.keySet()) {
-            if (descriptor.getPath().equals(s)) {
-                EditorPartPresenter editorPartPresenter = openedEditors.get(s);
-                editorAgent.activateEditor(editorPartPresenter);
-                fileOpened(editorPartPresenter, descriptor.getOffset());
-                return;
-            }
+        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(descriptor.getPath());
+        if (openedEditor != null) {
+            editorAgent.activateEditor(openedEditor);
+            fileOpened(openedEditor, descriptor.getOffset());
         }
-
 
         if (descriptor.isBinary()) {
             javaNodeManager.getClassNode(context.getCurrentProject().getProjectConfig(), descriptor.getLibId(), descriptor.getPath())
@@ -154,12 +147,11 @@ public class OpenDeclarationFinder {
     }
 
     private void openFile(VirtualFile result, final OpenDeclarationDescriptor descriptor) {
-        final Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
         Log.info(getClass(), result.getPath());
-        if (openedEditors.containsKey(result.getPath())) {
-            EditorPartPresenter editorPartPresenter = openedEditors.get(result.getPath());
-            editorAgent.activateEditor(editorPartPresenter);
-            fileOpened(editorPartPresenter, descriptor.getOffset());
+        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(descriptor.getPath());
+        if (openedEditor != null) {
+            editorAgent.activateEditor(openedEditor);
+            fileOpened(openedEditor, descriptor.getOffset());
         } else {
             editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
                 @Override

@@ -66,7 +66,6 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     private final ConsolesPanelPresenter   consolesPanelPresenter;
 
     private CurrentProject            project;
-    private List<EditorPartPresenter> openedEditors;
 
     /**
      * Create presenter
@@ -151,10 +150,6 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     /** {@inheritDoc} */
     @Override
     public void onRemoveClicked() {
-        openedEditors = new ArrayList<>();
-        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors().values()) {
-            openedEditors.add(partPresenter);
-        }
         final GitOutputConsole console = gitOutputConsoleFactory.create(REMOVE_FROM_INDEX_COMMAND_NAME);
         service.remove(appContext.getWorkspaceId(), project.getRootProject(), getFilePatterns(), view.isRemoved(),
                        new AsyncRequestCallback<String>() {
@@ -169,12 +164,11 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
 
                                    if (projectExplorer.getSelection().getHeadElement() instanceof FileReferenceNode) {
                                        FileReferenceNode selectFile = ((FileReferenceNode)projectExplorer.getSelection().getHeadElement());
-                                       for (EditorPartPresenter partPresenter : openedEditors) {
-                                           VirtualFile openFile = partPresenter.getEditorInput().getFile();
-                                           //to close selected file if it open
-                                           if (selectFile.getStorablePath().equals(openFile.getPath())) {
-                                               eventBus.fireEvent(new FileEvent(openFile, FileEvent.FileOperation.CLOSE));
-                                           }
+                                       //to close selected file if it open
+                                       EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(selectFile.getStorablePath());
+                                       if (openedEditor != null) {
+                                           VirtualFile openFile = openedEditor.getEditorInput().getFile();
+                                           eventBus.fireEvent(new FileEvent(openFile, FileEvent.FileOperation.CLOSE));
                                        }
                                    }
                                }

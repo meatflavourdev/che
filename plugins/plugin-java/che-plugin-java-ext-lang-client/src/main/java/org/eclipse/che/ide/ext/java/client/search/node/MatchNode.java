@@ -140,7 +140,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
     @Override
     public void actionPerformed() {
         if (compilationUnit != null) {
-            EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditors().get(compilationUnit.getPath());
+            EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(compilationUnit.getPath());
             if (editorPartPresenter != null) {
                 editorAgent.activateEditor(editorPartPresenter);
                 fileOpened(editorPartPresenter);
