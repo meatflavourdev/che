@@ -293,13 +293,13 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("failed.to.process.fin.usage")
     String failedToProcessFindUsage();
-    
+
     @Key("open.implementation.action.name")
     String openImplementationActionName();
-    
+
     @Key("open.implementation.action.description")
     String openImplementationDescription();
-    
+
     @Key("open.implementation.window.title")
     String openImplementationWindowTitle(String declaration, int founded);
 
@@ -326,4 +326,10 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("rename.with.warnings")
     String renameWithWarnings();
+
+    @Key("unable.to.save.java.compiler.errors.warnings.settings")
+    String unableToSaveJavaCompilerErrorsWarningsSettings();
+
+    @Key("unable.to.load.java.compiler.errors.warnings.settings")
+    String unableToLoadJavaCompilerErrorsWarningsSettings();
 }

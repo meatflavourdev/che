@@ -10,18 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
+import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
-import org.eclipse.che.ide.ext.java.client.settings.service.SettingsServiceClient;
-import org.eclipse.che.ide.settings.common.AbstractSettingsPagePresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -52,65 +54,62 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class ErrorWarningsPresenter extends AbstractSettingsPagePresenter implements PropertyWidget.ActionDelegate {
+public class ErrorWarningsPresenter extends AbstractPreferencePagePresenter implements PropertyWidget.ActionDelegate,
+                                                                                       WsAgentStateHandler {
 
     private final ErrorWarningsView     view;
-    private final SettingsServiceClient service;
     private final PropertyWidgetFactory propertyFactory;
+    private final PreferencesManager    preferencesManager;
 
-    private final Map<String, String>         changedProperties;
     private final Map<String, PropertyWidget> widgets;
-
-    private Map<String, String> allProperties;
 
     @Inject
     public ErrorWarningsPresenter(JavaLocalizationConstant locale,
                                   ErrorWarningsView view,
-                                  SettingsServiceClient service,
-                                  PropertyWidgetFactory propertyFactory) {
+                                  PropertyWidgetFactory propertyFactory,
+                                  @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
+                                  EventBus eventBus) {
         super(locale.compilerSetup());
 
         this.view = view;
 
-        this.service = service;
         this.propertyFactory = propertyFactory;
+        this.preferencesManager = preferencesManager;
 
-        this.changedProperties = new HashMap<>();
-        this.allProperties = new HashMap<>();
         this.widgets = new HashMap<>();
+
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isDirty() {
-        return !changedProperties.isEmpty();
+        for (Map.Entry<String, PropertyWidget> entry : widgets.entrySet()) {
+            String propertyName = entry.getKey();
+            String changedValue = entry.getValue().getSelectedValue();
+            if (!changedValue.equals(preferencesManager.getValue(propertyName))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** {@inheritDoc} */
     @Override
     public void storeChanges() {
-        service.applyCompileParameters(changedProperties);
-
-        for (Map.Entry<String, String> entry : changedProperties.entrySet()) {
-            String id = entry.getKey();
-            String changedValue = entry.getValue();
-
-            allProperties.put(id, changedValue);
+        for (Map.Entry<String, PropertyWidget> entry : widgets.entrySet()) {
+            preferencesManager.setValue(entry.getKey(), entry.getValue().getSelectedValue());
         }
-
-        changedProperties.clear();
     }
 
     /** {@inheritDoc} */
     @Override
     public void revertChanges() {
-        changedProperties.clear();
-
         for (Map.Entry<String, PropertyWidget> entry : widgets.entrySet()) {
             String propertyId = entry.getKey();
             PropertyWidget widget = entry.getValue();
 
-            String previousValue = allProperties.get(propertyId);
+            String previousValue = preferencesManager.getValue(propertyId);
 
             widget.selectPropertyValue(previousValue);
         }
@@ -119,27 +118,19 @@ public class ErrorWarningsPresenter extends AbstractSettingsPagePresenter implem
     /** {@inheritDoc} */
     @Override
     public void onPropertyChanged(@NotNull String propertyId, @NotNull String value) {
-        changedProperties.put(propertyId, value);
-
         delegate.onDirtyChanged();
     }
 
     /** {@inheritDoc} */
     @Override
     public void go(AcceptsOneWidget container) {
-        addErrorWarningsPanel();
-
         container.setWidget(view);
     }
 
     private void addErrorWarningsPanel() {
-        Promise<Map<String, String>> propertiesPromise = service.getCompileParameters();
-
-        propertiesPromise.then(new Operation<Map<String, String>>() {
+        preferencesManager.loadPreferences().then(new Operation<Map<String, String>>() {
             @Override
             public void apply(Map<String, String> properties) throws OperationException {
-                ErrorWarningsPresenter.this.allProperties = properties;
-
                 createAndAddWidget(COMPILER_UNUSED_LOCAL);
 
                 createAndAddWidget(COMPILER_UNUSED_IMPORT);
@@ -188,7 +179,7 @@ public class ErrorWarningsPresenter extends AbstractSettingsPagePresenter implem
 
         PropertyWidget widget = propertyFactory.create(option);
 
-        String value = allProperties.get(parameterId);
+        String value = preferencesManager.getValue(parameterId);
 
         widget.selectPropertyValue(value);
 
@@ -197,5 +188,14 @@ public class ErrorWarningsPresenter extends AbstractSettingsPagePresenter implem
         widgets.put(parameterId, widget);
 
         view.addProperty(widget);
+    }
+
+    @Override
+    public void onWsAgentStarted(WsAgentStateEvent event) {
+        addErrorWarningsPanel();
+    }
+
+    @Override
+    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 }
