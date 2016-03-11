@@ -23,9 +23,12 @@ export class DashboardController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor() {
-  }
+  constructor($rootScope) {
+    'ngInject';
 
+    this.widgetId = 'dashboardPageContent';
+    $rootScope.$broadcast('event:compileWidgetId', this.widgetId);
+  }
 
 }
 
