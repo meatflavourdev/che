@@ -804,15 +804,16 @@ public class MachineManager {
             snapshotWithKey = new SnapshotImpl(snapshot);
             snapshotWithKey.setInstanceKey(machine.saveToSnapshot(machine.getOwner()));
 
-            snapshotDao.saveSnapshot(snapshotWithKey);
             try {
-                snapshotDao.removeSnapshot(snapshotDao.getSnapshot(snapshot.getWorkspaceId(), snapshot.getEnvName(), snapshot.getMachineName()).getId());
-                if (snapshot.getInstanceKey() != null) {
-                    machineInstanceProviders.getProvider(snapshot.getType()).removeInstanceSnapshot(snapshot.getInstanceKey());
-                }
+                SnapshotImpl outOfDateSnapshot = snapshotDao.getSnapshot(snapshot.getWorkspaceId(),
+                                                                         snapshot.getEnvName(),
+                                                                         snapshot.getMachineName());
+                snapshotDao.removeSnapshot(outOfDateSnapshot.getId());
+                machineInstanceProviders.getProvider(outOfDateSnapshot.getType()).removeInstanceSnapshot(outOfDateSnapshot.getInstanceKey());
             } catch (NotFoundException ignored) {
                //DO nothing if we has no snapshots
             }
+            snapshotDao.saveSnapshot(snapshotWithKey);
 
             LOG.info("Snapshot of machine [ws = {}: env = {}: machine = {}] was successfully created, its id is '{}'",
                      snapshot.getWorkspaceId(),

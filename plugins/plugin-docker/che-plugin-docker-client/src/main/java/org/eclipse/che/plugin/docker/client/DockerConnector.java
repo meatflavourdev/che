@@ -970,8 +970,8 @@ public class DockerConnector {
                     @Override
                     public void run() {
                         try {
-                            //String pattern = tag + ": digest: sha256:(?<" + DIGEST_GROUP + ">[a-z0-9]{64}) size: \\d+"; // TODO tag is always null
-                            Pattern digestPattern = Pattern.compile("digest: sha256:(?<" + DIGEST_GROUP + ">[a-z0-9]{64}) size: \\d+"); // TODO add tag
+                            //String pattern = tag + ": digest: (?<" + DIGEST_GROUP + ">sha256:[a-z0-9]{64}) size: \\d+"; // TODO tag is always null
+                            Pattern digestPattern = Pattern.compile("digest: (?<" + DIGEST_GROUP + ">sha256:[a-z0-9]{64}) size: \\d+"); // TODO add tag
                             Matcher digestMatcher;
                             ProgressStatus progressStatus;
                             while ((progressStatus = progressReader.next()) != null && exceptionHolder.get() == null) {
