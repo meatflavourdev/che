@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:22.04
 RUN apt-get update && apt-get -y install curl sudo procps wget && \
     echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     useradd -u 1000 -G users,sudo -d /home/user --shell /bin/bash -m user && \
